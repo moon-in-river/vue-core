@@ -143,6 +143,7 @@ export function watch(
     return traverse(source)
   }
 
+  // TODO: 理解其他变量作用
   let effect: ReactiveEffect
   let getter: () => any
   let cleanup: (() => void) | undefined
@@ -150,6 +151,7 @@ export function watch(
   let forceTrigger = false
   let isMultiSource = false
 
+  // 将各种入参规范化为 getter 函数
   if (isRef(source)) {
     getter = () => source.value
     forceTrigger = isShallow(source)
