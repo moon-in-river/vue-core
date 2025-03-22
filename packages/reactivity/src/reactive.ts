@@ -56,6 +56,7 @@ function targetTypeMap(rawType: string) {
 }
 
 function getTargetType(value: Target) {
+  // 如果 skip 标记为 true 或者 value 不可扩展，返回无效
   return value[ReactiveFlags.SKIP] || !Object.isExtensible(value)
     ? TargetType.INVALID
     : targetTypeMap(toRawType(value))
@@ -261,6 +262,7 @@ function createReactiveObject(
   collectionHandlers: ProxyHandler<any>,
   proxyMap: WeakMap<Target, any>,
 ) {
+  // 不是对象类型直接返回target
   if (!isObject(target)) {
     if (__DEV__) {
       warn(
@@ -271,7 +273,7 @@ function createReactiveObject(
     }
     return target
   }
-  // target is already a Proxy, return it.
+  // target 已经是 Proxy 类型，直接返回 target
   // exception: calling readonly() on a reactive object
   if (
     target[ReactiveFlags.RAW] &&
@@ -279,20 +281,23 @@ function createReactiveObject(
   ) {
     return target
   }
-  // only specific value types can be observed.
+  // 只有特定类型可以被观察（skip 标记不能为 true，对象可扩展，为 Object、Array、Map、Set、WeakMap、WeakSet）
   const targetType = getTargetType(target)
   if (targetType === TargetType.INVALID) {
     return target
   }
-  // target already has corresponding Proxy
+  // target 已经有对应的 Proxy 对象，直接返回存在的 Proxy 对象
   const existingProxy = proxyMap.get(target)
   if (existingProxy) {
     return existingProxy
   }
+  // 创建 Proxy 代理对象
   const proxy = new Proxy(
     target,
+    // 如果是集合类型，使用集合类型的 Proxy 处理器，否则使用基础类型的 Proxy 处理器
     targetType === TargetType.COLLECTION ? collectionHandlers : baseHandlers,
   )
+  // 将 Proxy 代理对象存储到 proxyMap 中
   proxyMap.set(target, proxy)
   return proxy
 }

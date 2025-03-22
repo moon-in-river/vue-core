@@ -47,7 +47,15 @@ function hasOwnProperty(this: object, key: unknown) {
 }
 
 class BaseReactiveHandler implements ProxyHandler<Target> {
-  constructor(
+    // 简写写法：声明类属性，并自动将参数值赋值给对应的属性
+    // 传统写法
+    // protected readonly _isReadonly: boolean
+    // protected readonly _isShallow: boolean
+    // constructor(_isReadonly = false, isShallow = false) {
+    //   this._isReadonly = _isReadonly
+    //   this._isShallow = isShallow
+    // }
+    constructor(
     protected readonly _isReadonly = false,
     protected readonly _isShallow = false,
   ) {}
@@ -88,6 +96,7 @@ class BaseReactiveHandler implements ProxyHandler<Target> {
 
     if (!isReadonly) {
       let fn: Function | undefined
+      // TODO: 数组类型，如果 key 是数组方法，返回重写过的方法
       if (targetIsArray && (fn = arrayInstrumentations[key])) {
         return fn
       }
@@ -114,6 +123,7 @@ class BaseReactiveHandler implements ProxyHandler<Target> {
     }
 
     if (isShallow) {
+      // 浅层响应式，直接返回 res
       return res
     }
 
@@ -126,6 +136,7 @@ class BaseReactiveHandler implements ProxyHandler<Target> {
       // Convert returned value into a proxy as well. we do the isObject check
       // here to avoid invalid value warning. Also need to lazy access readonly
       // and reactive here to avoid circular dependency.
+      // 默认深度响应式，如果 res 是对象，则将其转换为响应式对象
       return isReadonly ? readonly(res) : reactive(res)
     }
 

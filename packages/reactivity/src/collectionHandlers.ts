@@ -269,10 +269,13 @@ function createInstrumentationGetter(isReadonly: boolean, shallow: boolean) {
     receiver: CollectionTypes,
   ) => {
     if (key === ReactiveFlags.IS_REACTIVE) {
+      // 如果访问的是 isReactive 标志，返回 !isReadonly
       return !isReadonly
     } else if (key === ReactiveFlags.IS_READONLY) {
+      // 如果访问的是 isReadonly 标志，返回 isReadonly
       return isReadonly
     } else if (key === ReactiveFlags.RAW) {
+      // 如果访问的是 raw 标志，返回 target 原始值
       return target
     }
 
@@ -287,6 +290,7 @@ function createInstrumentationGetter(isReadonly: boolean, shallow: boolean) {
 }
 
 export const mutableCollectionHandlers: ProxyHandler<CollectionTypes> = {
+  // 只定义 get 代理行为
   get: /*@__PURE__*/ createInstrumentationGetter(false, false),
 }
 
